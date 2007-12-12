@@ -1,0 +1,8 @@
+#summary What you're looking for in a weekly menu
+
+= Weekly Menu Requirements =
+  * Target Price
+  * By Day *
+    * Available cooking time
+    * Ideal familiarity (confidence with which you'll like the food)
+    * Pick a recipe
