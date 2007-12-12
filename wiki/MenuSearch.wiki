@@ -1,5 +1,7 @@
 #summary What you're looking for in a weekly menu
 
+[Home Go Back]
+
 = Weekly Menu Requirements =
   * Target Price
   * By Day *
