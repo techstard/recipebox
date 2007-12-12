@@ -2,6 +2,7 @@
 
 = Things General to everyone =
   * *Course* i.e. Entree, Dessert, etc.
+  * *Ethnicity*
   * *Avg. Rating* out of 5 ladles (or whatever)
   * *Recipe sub-part* This is more of a container, a recipe will contain >0 it'll divide sauce from thing it goes on (for example)
     * *Ingredient*
