@@ -8,9 +8,9 @@ This Wiki is designed to facilitate the development of a recipe resource you all
 
 
 == Information I need help with: ===
-  * Things it's useful to know about recipes
-  * Ways you'd like to search for individual recipes
-  * What you're looking for in a weekly menu
+  * [RecipeInfo Things it's useful to know about recipes] 
+  * [RecipeSearch Ways you'd like to search for individual recipes] 
+  * [MenuSearch What you're looking for in a weekly menu] 
 
 == Programming information: =
   * TBD Once we get some of the above
