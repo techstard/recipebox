@@ -1,5 +1,3 @@
-#summary Homepage
-
 = Introduction =
 
 This Wiki is designed to facilitate the development of a recipe resource you all will find useful.  Of necessity, it'll be split into two sections
