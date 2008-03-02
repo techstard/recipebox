@@ -5,7 +5,7 @@
 
 package cookbooktokenizertrainer;
 
-import java.io.File;
+import java.io.*;
 import org.w3c.dom.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -32,6 +32,8 @@ public class Main {
         NodeList nodeLst = doc.getElementsByTagName("page");
         int numRecipes = 0;
 
+        loadList();
+        
         for (int s = 0; s < nodeLst.getLength(); s++) {
             Node fstNode = nodeLst.item(s);
             if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
@@ -49,6 +51,8 @@ public class Main {
         }
         System.out.println("Parsed items= "+numTerms);
         printList();
+        //writeList();
+        sortTerms();
         } catch (Exception e) {
         e.printStackTrace();
         e.getCause();
@@ -64,11 +68,13 @@ public class Main {
             numTerms++;
             indx = text.indexOf("[[Cookbook:",i);
             wikiLink = text.substring(text.indexOf("[[Cookbook:",i),text.indexOf("]]",indx));
+            wikiLink = wikiLink.toLowerCase();
+            wikiLink = wikiLink.replace('_',' ');
             //Switch based on whether the wikilink has an alias
             if(wikiLink.contains("|"))
             {
-                canTerm = wikiLink.substring(11,wikiLink.indexOf('|')).trim().toLowerCase();
-                alias = wikiLink.substring(wikiLink.indexOf('|')+1,wikiLink.length()).trim().toLowerCase();
+                canTerm = wikiLink.substring(11,wikiLink.indexOf('|')).trim();
+                alias = wikiLink.substring(wikiLink.indexOf('|')+1,wikiLink.length()).trim();
             }
             else
             {
@@ -89,7 +95,7 @@ public class Main {
         {
             List temp = new ArrayList();
             temp.add(canTerm);
-            temp.add(alias);
+            if(!canTerm.equals(alias)) temp.add(alias);
             canonicalTerms.put(canTerm, temp);
         }
         //else(we've seen this term before, check if the alias is also a duplicate)
@@ -123,5 +129,99 @@ public class Main {
             System.out.println("");
         }
         
+    }
+    static void loadList()
+    {
+        try{
+            FileReader fr = new FileReader("canTerms.txt");
+            BufferedReader br = new BufferedReader(fr, 80);
+            String line;
+            String[] temp, temp2;
+
+            while((line = br.readLine()) != null)
+            {
+                temp = line.split(",",2);
+                temp2 = temp[1].split(",");
+                for(int i=0;i<temp2.length;i++)
+                {
+                    addToMap(temp[0],temp2[i]);                   
+                }
+            }
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+    static String canTermToString(String key)
+    {
+        String temp = key;
+            ListIterator valList = canonicalTerms.get(key).listIterator();
+            while(valList.hasNext())
+            {
+                temp += ","+valList.next();
+            }
+            temp += '\n';
+            return temp;
+    }
+    static void writeList()
+    {
+        Object[] keyArray = canonicalTerms.keySet().toArray();
+        //System.out.println("TOTAL K+V= "+canonicalTerms.values().size());
+        try {
+        FileWriter fs = new FileWriter("canTerms.txt");
+        BufferedWriter out = new BufferedWriter(fs);
+        for(int i=0;i<keyArray.length;i++)
+        {
+            out.write(canTermToString(keyArray[i].toString()));
+        }
+        out.close();
+        } catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+    static void sortTerms()
+    {
+        /*Don't do this very often!!!
+         * User interface and file I/O for sorting canonical terms
+         * 
+         * prereqs: populated canonicalTerms
+         * output: multiple flat files
+         * */
+        try{
+            FileWriter ing = new FileWriter("ingredients.txt");
+            FileWriter unit = new FileWriter("units.txt");
+            FileWriter tool = new FileWriter("tools.txt");
+            FileWriter meth = new FileWriter("methods.txt");
+            FileWriter other = new FileWriter("other.txt");
+            BufferedWriter ingOut = new BufferedWriter(ing);
+            BufferedWriter unitOut = new BufferedWriter(unit);
+            BufferedWriter toolOut = new BufferedWriter(tool);
+            BufferedWriter methOut = new BufferedWriter(meth);
+            BufferedWriter otherOut = new BufferedWriter(other);
+            Object[] keyArray = canonicalTerms.keySet().toArray();
+            for(int i=0;i<keyArray.length;i++)
+            {
+                System.out.println(canTermToString((String)keyArray[i]));
+                System.out.println("   1) Ingredients");
+                System.out.println("   2) Units");
+                System.out.println("   3) Cooking Tools");
+                System.out.println("   4) Cooking Methods");
+                System.out.println("   5) Other\n");
+                switch(System.in.read())
+                {
+                    case 1: ingOut.write(canTermToString(keyArray[i].toString()));
+                    case 2: unitOut.write(canTermToString(keyArray[i].toString()));
+                    case 3: toolOut.write(canTermToString(keyArray[i].toString()));
+                    case 4: methOut.write(canTermToString(keyArray[i].toString()));
+                    case 5: otherOut.write(canTermToString(keyArray[i].toString()));
+                }
+            }
+            ingOut.close();
+            unitOut.close();
+            toolOut.close();
+            methOut.close();
+            otherOut.close();
+        }catch(Exception e) {e.printStackTrace();}
     }
 }
