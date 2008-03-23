@@ -17,12 +17,16 @@ public class Parser
    String test="";
    String ingredient = "";
    boolean ingredients = false;
+   FileOutputStream out;
+   PrintStream p;
    
    try{
+      out=new FileOutputStream("output.txt");
+      out.close();
    in = new FileInputStream("Web Page.rtf");
-   DataInputStream foo = new DataInputStream(in);
+   BufferedReader foo = new BufferedReader(new InputStreamReader(in));
    
-   while (foo.available()!= 0)
+   while (foo.ready()==true)
    {
      test=foo.readLine();
 
@@ -67,8 +71,6 @@ page=page.substring(start, end);
     lastnum++;
     numeric=ingredient.substring(0,lastnum);
     x=0;
-    FileOutputStream out;
-    PrintStream p;
     double numvalue=0.0;
     double base=0.0;
     double multiple=0.0;
@@ -80,6 +82,7 @@ page=page.substring(start, end);
     
     try
     {
+
       out=new FileOutputStream("output.txt", true);
       p=new PrintStream(out, true);
 
