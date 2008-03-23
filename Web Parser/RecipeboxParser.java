@@ -168,7 +168,7 @@ public class RecipeboxParser implements HtmlParseFilter {
     public Parse filter(Content con, Parse p, HTMLMetaTags m, DocumentFragment df) {
 
         try {
-            FileOutputStream out = new FileOutputStream("output.txt", true);
+            FileOutputStream out = new FileOutputStream("output.txt");
             PrintStream ps = new PrintStream(out, true);
             ps.print("Beginning Function on page: "+con.getUrl());
             FileInputStream in = null;
@@ -177,15 +177,14 @@ public class RecipeboxParser implements HtmlParseFilter {
             int end = 0;
             char first = ' ';
             char second = ' ';
-            String page = "";
+            String page = new String(con.getContent());
             String test = "";
             String ingredient = "";
             boolean ingredients = false;
-
-            page = con.getContent().toString();
-            ps.println("<!-----------CONTENT----------->");
-            ps.println(page);
-            ps.println("<------------END CONTENT----------------->");
+            
+            //ps.println("<!-----------CONTENT----------->");
+            //ps.println(page);
+            //ps.println("<------------END CONTENT----------------->");
             //locate the start of the ingredients block
             start = page.indexOf("h2");
             if (start < 0) {
@@ -283,12 +282,13 @@ public class RecipeboxParser implements HtmlParseFilter {
                     //print to a file
                     ps.println(ingredient);
                     ps.println(numvalue);
-                    ps.close();
-                    out.close();
+
                 } else {
                     break;
                 }
             }
+            ps.close();
+            out.close();
             return p;
         } catch (Exception e) {
             System.out.println("Unable to open file!");
