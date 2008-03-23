@@ -180,8 +180,12 @@ public class RecipeboxParser implements HtmlParseFilter {
         page = con.getContent().toString();
         //locate the start of the ingredients block
         start = page.indexOf("h2");
+        if(start <0)
+          break;
         page = page.substring(start);
         start = page.indexOf("h2");
+        if (start <0)
+          break;
         end = page.indexOf("</ul");
         page = page.substring(start, end);
 
