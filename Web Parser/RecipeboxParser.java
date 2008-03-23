@@ -166,63 +166,70 @@ public class RecipeboxParser implements HtmlParseFilter {
     }
 
     public Parse filter(Content con, Parse p, HTMLMetaTags m, DocumentFragment df) {
-        FileInputStream in = null;
-        int c = 0;
-        int start = 0;
-        int end = 0;
-        char first = ' ';
-        char second = ' ';
-        String page = "";
-        String test = "";
-        String ingredient = "";
-        boolean ingredients = false;
 
-        page = con.getContent().toString();
-        //locate the start of the ingredients block
-        start = page.indexOf("h2");
-        if(start <0)
-          break;
-        page = page.substring(start);
-        start = page.indexOf("h2");
-        if (start <0)
-          break;
-        end = page.indexOf("</ul");
-        page = page.substring(start, end);
+        try {
+            FileOutputStream out = new FileOutputStream("output.txt", true);
+            PrintStream ps = new PrintStream(out, true);
+            ps.print("Beginning Function on page: "+con.getUrl());
+            FileInputStream in = null;
+            int c = 0;
+            int start = 0;
+            int end = 0;
+            char first = ' ';
+            char second = ' ';
+            String page = "";
+            String test = "";
+            String ingredient = "";
+            boolean ingredients = false;
 
-        while (true) {
-            start = page.indexOf("<li>");
-            if (start >= 0) {
-                page = page.substring(start + 4);
-                end = page.indexOf("</li>");
-                ingredient = page.substring(0, end);
-                System.out.println(ingredient);
-                //Locate the numerical portion of each ingredient
-                int x = 0;
-                int lastnum = 0;
-                String numeric = "";
-                while (x < ingredient.length()) {
-                    if ((ingredient.charAt(x) <= 57) && (ingredient.charAt(x) >= 48)) {
-                        lastnum = x;
+            page = con.getContent().toString();
+            ps.println("<!-----------CONTENT----------->");
+            ps.println(page);
+            ps.println("<------------END CONTENT----------------->");
+            //locate the start of the ingredients block
+            start = page.indexOf("h2");
+            if (start < 0) {
+                ps.println("h2 not found");
+                return p;
+            }
+            page = page.substring(start);
+            start = page.indexOf("h2");
+            if (start < 0) {
+                ps.println("second h2 not found");
+                return p;
+            }
+            end = page.indexOf("</ul");
+            page = page.substring(start, end);
+            
+            ps.println("beginning ingredient parse");
+            while (true) {
+                start = page.indexOf("<li>");
+                if (start >= 0) {
+                    page = page.substring(start + 4);
+                    end = page.indexOf("</li>");
+                    ingredient = page.substring(0, end);
+                    System.out.println(ingredient);
+                    //Locate the numerical portion of each ingredient
+                    int x = 0;
+                    int lastnum = 0;
+                    String numeric = "";
+                    while (x < ingredient.length()) {
+                        if ((ingredient.charAt(x) <= 57) && (ingredient.charAt(x) >= 48)) {
+                            lastnum = x;
+                        }
+                        x++;
                     }
-                    x++;
-                }
-                lastnum++;
-                numeric = ingredient.substring(0, lastnum);
-                x = 0;
-                FileOutputStream out;
-                PrintStream ps;
-                double numvalue = 0.0;
-                double base = 0.0;
-                double multiple = 0.0;
-                double top = 0.0;
-                double bottom = 0.0;
-                Boolean mult = false;
-                Boolean mixedfraction = false;
-                Boolean fraction = false;
-
-                try {
-                    out = new FileOutputStream("output.txt", true);
-                    ps = new PrintStream(out, true);
+                    lastnum++;
+                    numeric = ingredient.substring(0, lastnum);
+                    x = 0;
+                    double numvalue = 0.0;
+                    double base = 0.0;
+                    double multiple = 0.0;
+                    double top = 0.0;
+                    double bottom = 0.0;
+                    Boolean mult = false;
+                    Boolean mixedfraction = false;
+                    Boolean fraction = false;
 
                     while (x < numeric.length()) {
                         if ((!mult) && (!mixedfraction) && (!fraction)) {
@@ -278,14 +285,16 @@ public class RecipeboxParser implements HtmlParseFilter {
                     ps.println(numvalue);
                     ps.close();
                     out.close();
-                } catch (Exception e) {
-                    System.out.println("Unable to open file!");
+                } else {
+                    break;
                 }
-            } else {
-                break;
             }
+            return p;
+        } catch (Exception e) {
+            System.out.println("Unable to open file!");
+            return p;
         }
-        return p;
+
     }
 
     public void setConf(Configuration conf) {
