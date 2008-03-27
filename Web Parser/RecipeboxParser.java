@@ -173,40 +173,64 @@ public class RecipeboxParser implements HtmlParseFilter {
             ps.print("Beginning Function on page: "+con.getUrl());
             FileInputStream in = null;
             int c = 0;
+            int i =0;
             int start = 0;
             int end = 0;
             char first = ' ';
             char second = ' ';
             String page = new String(con.getContent());
             String test = "";
+            String title = "";
             String ingredient = "";
+            String substring = "";
+            String description = "";
+            String directions = "";
             boolean ingredients = false;
             
             //ps.println("<!-----------CONTENT----------->");
             //ps.println(page);
             //ps.println("<------------END CONTENT----------------->");
-            //locate the start of the ingredients block
+            /*
+            ********************************************
+            * This is the beginning of the parsing.    *
+            * Copy-Paste this part into the SVN file.  *
+            * ******************************************
+            */
+            start = page.indexOf("<title>");
+            if (start < 0)
+              ps.println("No title for the webpage");
+            
+            substring = page.substring(start+7); 
+            end=substring.indexOf("</title>");
+            title=substring.substring(0, end);
+            ps.println("Title:");
+            ps.println(title);
+            
+           
             start = page.indexOf("h2");
             if (start < 0) {
                 ps.println("h2 not found");
-                return p;
+               // return p;
             }
-            page = page.substring(start);
-            start = page.indexOf("h2");
+            substring = page.substring(start);
+            start = substring.indexOf("h2");
             if (start < 0) {
                 ps.println("second h2 not found");
-                return p;
+              //  return p;
             }
-            end = page.indexOf("</ul");
-            page = page.substring(start, end);
+            end = substring.indexOf("</ul");
+            substring = substring.substring(start, end);
+
+
+            
             
             ps.println("beginning ingredient parse");
             while (true) {
-                start = page.indexOf("<li>");
+                start = substring.indexOf("<li>");
                 if (start >= 0) {
-                    page = page.substring(start + 4);
-                    end = page.indexOf("</li>");
-                    ingredient = page.substring(0, end);
+                    substring = substring.substring(start + 4);
+                    end = substring.indexOf("</li>");
+                    ingredient = substring.substring(0, end);
                     System.out.println(ingredient);
                     //Locate the numerical portion of each ingredient
                     int x = 0;
@@ -287,6 +311,38 @@ public class RecipeboxParser implements HtmlParseFilter {
                     break;
                 }
             }
+            //begin direction parse
+            int i;
+            start = page.indexOf("h2");
+            substring=page.substring(start+1);
+            for(i=1; i<3; i++)
+            {
+            start = substring.indexOf("h2");
+            substring=substring.substring(start+1);
+            }
+            
+            end=substring.indexOf("</ol>");
+            substring=substring.substring(0, end);
+            while (true)
+            {
+              start = substring.indexOf("<span>");
+              if(start < 0)
+               break; 
+              substring=substring.substring(start+6);
+              end = substring.indexOf("</span>");
+              directions=directions+substring.substring(0, end)+System.getProperty("line.separator") ;
+            }
+            ps.println("Directions:");
+            ps.println(directions);
+            
+            //locate the description
+            start=page.indexOf("<!-- DESCRIPTION -->");
+            substring=page.substring(start+20);
+            end=substring.indexOf("</span");
+            description=substring.substring(0, end);
+            ps.println("Description:");
+            ps.println(description);
+            
             ps.close();
             out.close();
             return p;
