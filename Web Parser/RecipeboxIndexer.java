@@ -43,7 +43,14 @@ public class RecipeboxIndexer implements IndexingFilter {
      *           new Field("recommended", recommendation, 
      *              Field.Store.YES, Field.Index.UN_TOKENIZED);
      *       recommendedField.setBoost(5.0f);
-     */       
+     */
+      for(int i=0;i<parse.getData().getContentMeta().size();i++)
+      {
+          String field = parse.getData().getContentMeta().names()[i];
+          String value = parse.getData().getMeta(field);
+          doc.add(new Field(field, value, Field.Store.YES, Field.Index.UN_TOKENIZED));
+          System.out.println("Indexer: Recipebox added field "+field);
+      }
 
     return doc;
   }
