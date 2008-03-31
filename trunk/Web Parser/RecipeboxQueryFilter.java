@@ -16,7 +16,7 @@ public class RecipeboxQueryFilter extends FieldQueryFilter {
         /*I'm not sure this'll be necessary, but it might be nice
          *
          */  
-        super("recommended", 5f);
+        super("ingredient", 5f);
         LOG.info("Added a recommended query");
     }
   
