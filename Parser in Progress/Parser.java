@@ -8,25 +8,29 @@ public class Parser {
         FileOutputStream out = null;
         String page = "";
         String temp = "";
-        String ingredient = "";
         PrintStream p = null;
         int start = 0;
         int end = 0;
 
         try {
-            in = new FileInputStream("Page10.txt");
+            in = new FileInputStream("page10.txt");
             BufferedReader foo = new BufferedReader(new InputStreamReader(in));
 
             while (foo.ready() == true) {
-                page = page + foo.readLine();
+                String blah = foo.readLine();
+                if(blah.endsWith("\r\n"))
+                    page = page + blah;
+                else if(blah.endsWith("\r"))
+                    page = page + blah +"\n";
+                else page = page + blah + "\r\n";
+                //System.out.println(blah);
             }
             foo.close();
             in.close();
 
-            out = new FileOutputStream("output.txt");
+            out = new FileOutputStream("output10.txt");
             p = new PrintStream(out);
             
-
             //locate the page title
             start = page.indexOf("<title>");
             end = page.indexOf("</title>");
@@ -39,7 +43,7 @@ public class Parser {
             start = page.toLowerCase().indexOf("<body");
             end = page.toLowerCase().indexOf("</body>");
             if ((start >= 0) && (end >= 0))
-                page = page.substring(start, end+6);
+                page = page.substring(start, end+7);
 
             //remove all the tag information
             temp = removetags(page);
@@ -50,39 +54,31 @@ public class Parser {
             int loop;
             boolean begin = false;
             boolean text = false;
-            int test = 0;
+            char test = 0;
             String line = "";
-            for (loop = 0; loop < temp.length(); loop++) {
-                test = temp.charAt(loop);
-
-                if ((test >= 48) && (test <= 57)) {
-                    begin = true;
-
-                    if (text) {
-                        text = false;
-                        if (line.length() < 100) 
-                            p.println(line);
-                        line = "";
-                    }
-                } else if ((test >= 97) && (test <= 122)) {
-                    text = true;
-                } else if (test == 64) {
-                    if (begin) {
-                        begin = false;
-                        if (line.length() < 100)
-                            p.println(line);
-                        line = "";
-                    }
+            String[] lines = null;
+            char lf = 10;
+            if(temp.split("\n").length > 0) lines = temp.split("\n");
+            else lines = temp.split(Character.toString(lf));
+            
+            for(int i=0;i<lines.length;i++)
+            {
+                lines[i] = lines[i].trim();
+                if(lines[i].isEmpty())continue;
+                if(Character.isDigit(lines[i].charAt(0))) {
+                    p.println(lines[i]);
                 }
-                if (begin) 
-                    line = line + temp.charAt(loop);
+                else if(i>0 && i<(lines.length-1) &&
+                        !lines[i-1].isEmpty() && Character.isDigit(lines[i-1].charAt(0)) &&
+                        !lines[i+1].isEmpty() && Character.isDigit(lines[i+1].charAt(0)))
+                    p.println(lines[i]);
             }
             p.close();
             out.close();
             System.out.println("Done!");
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            System.out.println(e.getStackTrace());
+            e.printStackTrace();
         }
     }
 
@@ -90,19 +86,10 @@ public class Parser {
         int loop = 0;
         boolean copy = true;
         String temp = "";
+        temp = page.replaceAll(".\n", "\r\n");
         temp = page.replaceAll("<script.*?</script>","");
-        temp = temp.replaceAll("<.*?>", "");
-        /*
-        for (loop = 0; loop < page.length(); loop++) {
-            if (page.charAt(loop) == '<') {
-                copy = false;
-            } else if (page.charAt(loop) == '>') {
-                copy = true;
-                temp = temp + "@";
-            } else if (copy) {
-                temp = temp.concat(String.valueOf(page.charAt(loop)));
-            }
-        }*/
+        temp = temp.replaceAll("<.*?>", "\n");
+
         return temp;
     }
 }
