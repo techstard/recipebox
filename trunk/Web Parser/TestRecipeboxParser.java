@@ -29,14 +29,33 @@ public class TestRecipeboxParser extends TestCase {
     System.out.println("matt was here");
     File testDir =new File(System.getProperty("test.data"));
     System.out.println(testDir.getAbsolutePath());
-    pageTest(new File(testDir, "test.htm"), "http://foo.com/",
-            "\"Sweet pecans and cranberries add to the color and textures of this mixed-greens salad tossed with sliced pears and the kick of KRAFT Light Zesty Italian dressing.\"",
-             "Mixed Greens and Pear Salad - Allrecipes");
+    pageTest(new File(testDir, "page1.txt"), "http://allrecipes.com/", "Cooky Cookies - Allrecipes");
+    pageTest(new File(testDir, "page2.txt"), "http://www.recipe.com/", "Creamy Ice Milk - Healthy living - Recipe - Recipe.com");
+    pageTest(new File(testDir, "page3.txt"), "http://www.betterrecipes.com/", "White Cheddar Chicken with Apple Raisin Chutney");
+    pageTest(new File(testDir, "page4.txt"), "http://www.cooks.com/", "Cooks.com - Recipe - Appetizer Pie");
+    pageTest(new File(testDir, "page5.txt"), "http://www.epicurious.com/", "Braised Artichokes Recipe at Epicurious.com");
+    pageTest(new File(testDir, "page6.txt"), "http://www.recipesource.com/", "RecipeSource: Achot (Garlicky Farmer's Cheese with Walnuts)");
+    pageTest(new File(testDir, "page7.txt"), "http://www.cooksrecipes.com/", "Cooks Recipes | Bacon-Wrapped Shrimp with Quick B&eacute;arnaise Sauce Recipe");
+    pageTest(new File(testDir, "page8.txt"), "http://www.chow.com/", "Deviled Eggs with Tarragon Recipe by  - CHOW");
+    pageTest(new File(testDir, "page9.txt"), "http://www.cookingcache.com/", "Apple Berry Salsa With Cinnamon Chips Recipe");
+    pageTest(new File(testDir, "page10.txt"), "http://www.foodnetwork.com/", "Recipes : Roscommon Rhubarb Pie : Food Network");
     assertTrue(true);
+    /*
+     * allrecipes:    Page1
+ recipe.com: Page2
+ betterrecipes.com:  Page3
+ cooks.com: Page4
+ epicurious.com: Page5
+ recipesource.com: Page6
+ cooksrecipes.com: Page7
+ CHOW.com:  Page8
+ cookingcache.com: Page 9
+ foodnetwork.com: Page 10
+     * */
   }
 
 
-  public void pageTest(File file, String url, String description, String title)
+  public void pageTest(File file, String url, String title)
     throws Exception {
 
     String contentType = "text/html";
