@@ -22,30 +22,47 @@ import java.io.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import java.text.DecimalFormat;
+
 public class RecipeboxParser implements HtmlParseFilter {
 
     private Configuration conf;
     private String ingredientString;
+    private String amtString;
 
     public Parse filter(Content con, Parse p, HTMLMetaTags m, DocumentFragment df) {
-
+        ingredientString = "";
+        amtString = "";
         try {
-        
+
             FileOutputStream out = new FileOutputStream("C:\\NutchOutput.txt");
             PrintStream ps = new PrintStream(out, true);
             ps.print("Beginning Function on page: " + con.getUrl());
-            int i = 0;
             int start = 0;
             int end = 0;
-            String page = new String(con.getContent());
+            String page = "";
+            BufferedReader foo = new BufferedReader(new StringReader(new String(con.getContent())));
+            /*
+            while (foo.ready()) {
+                String blah = foo.readLine().toLowerCase();
+                if (blah.endsWith("\r\n")) {
+                    page = page + blah;
+                } else if (blah.endsWith("\r")) {
+                    page = page + blah + "\n";
+                } else {
+                    page = page + blah + "\r\n";
+                }
+              
+            //System.out.println(blah);
+            }
+            */
+            foo.close();
+            page = new String(con.getContent());
 
             //Following parsing these values will be set
             String title = "";
-            String description = "";
-            String directions = "";
 
             //These variables are reused, no output is guarenteed
-            String ingredient = "";
             String substring = "";
 
             //ps.println("<!-----------CONTENT----------->");
@@ -55,102 +72,79 @@ public class RecipeboxParser implements HtmlParseFilter {
             /*
              * TITLE PARSING
              */
-            start = page.indexOf("<title>");
+            start = page.toLowerCase().indexOf("<title");
             if (start < 0) {
                 ps.println("No title for the webpage");
             }
 
-            substring = page.substring(start + 7);
-            end = substring.indexOf("</title>");
-            title = substring.substring(0, end);
-            ps.println("Title:");
-            ps.println(title);
+            substring = page.substring(page.indexOf(">",start)+1);
+            end = substring.toLowerCase().indexOf("</title>");
+            title = substring.substring(0, end).trim();
+            title = title.replace("\r","");
+            System.out.println("Title: '"+title+"'");
 
             //TITLE ADDED TO INDEX
             p.getData().getContentMeta().set("title", title);
-
-            start = page.indexOf("h2");
-            if (start < 0) {
-                ps.println("h2 not found");
-                return p;
-            }
-            substring = page.substring(start);
-            start = substring.indexOf("h2");
-            if (start < 0) {
-                ps.println("second h2 not found");
-                return p;
-            }
-            end = substring.indexOf("</ul");
-            substring = substring.substring(start, end);
-
-
-
-
+            /*
+             * END TITLE PARSING
+             */
+            /*
+             * START INGREDIENT PARSING
+             */
             ps.println("beginning ingredient parse");
-            while (true) {
-                start = substring.indexOf("<li>");
-                if (start >= 0) {
-                    substring = substring.substring(start + 4);
-                    end = substring.indexOf("</li>");
-                    ingredient = substring.substring(0, end);
-                    System.out.println(ingredient);
-                    //Locate the numerical portion of each ingredient
-                    int x = 0;
-                    int lastnum = 0;
-                    String numeric = "";
-                    while (x < ingredient.length()) {
-                        if ((ingredient.charAt(x) <= 57) && (ingredient.charAt(x) >= 48)) {
-                            lastnum = x;
+            //trim the HTML to just the body of the text
+            page = page.toLowerCase();
+            
+            start = page.indexOf("<body");
+            end = page.indexOf("</body>");
+            if ((start >= 0) && (end >= 0)) {
+                page = page.substring(start, end + 7);
+            }
+
+            //remove all the tag information
+            String temp = removetags(page);
+
+            //locate the Ingredients
+
+            String[] lines = null;
+            char lf = 10;
+            if (temp.split("\n").length > 0) {
+                lines = temp.split("\n");
+            } else {
+                lines = temp.split(Character.toString(lf));
+            }
+
+            for (int i = 0; i < lines.length; i++) {
+                String tempLine = lines[i].trim();
+                if (tempLine.equals("")) {
+                    continue;
+                }
+                if (Character.isDigit(tempLine.charAt(0))) {
+                    if (tempLine.contains(" ")) {
+                        for (int j = 0; j < tempLine.length(); j++) {
+                            if (Character.isLetter(tempLine.charAt(j))) {
+                                p = addIngredToParse(tempLine, p);
+                                break;
+                            }
                         }
-                        x++;
                     }
-                    lastnum++;
-                    numeric = ingredient.substring(0, lastnum);
-                    x = 0;
-
-                    p = addIngredToParse(ingredient, p);
-
-                //print to a file
-                //ps.println(ingredient);
-                //ps.println(numvalue);
-
-                } else {
-                    break;
+                } else if (i > 0 && i < (lines.length - 1) &&
+                        !lines[i - 1].equals("") && Character.isDigit(lines[i - 1].charAt(0)) &&
+                        !lines[i + 1].equals("") && Character.isDigit(lines[i + 1].charAt(0))) {
+                    p = addIngredToParse(lines[i], p);
                 }
             }
+
+            
+
             //semicolon delimited ingredient string
             p.getData().getContentMeta().set("ingredient", ingredientString);
-            //begin direction parse
-            start = page.indexOf("h2");
-            substring = page.substring(start + 1);
-            for (i = 1; i < 3; i++) {
-                start = substring.indexOf("h2");
-                substring = substring.substring(start + 1);
-            }
+            //semicolon delimited value string (index corresponds to ingredient)
+            p.getData().getContentMeta().set("values", amtString);
 
-            end = substring.indexOf("</ol>");
-            substring = substring.substring(0, end);
-            while (true) {
-                start = substring.indexOf("<span>");
-                if (start < 0) {
-                    break;
-                }
-                substring = substring.substring(start + 6);
-                end = substring.indexOf("</span>");
-                directions = directions + substring.substring(0, end) + System.getProperty("line.separator");
-            }
-            ps.println("Directions:");
-            ps.println(directions);
-
-            //locate the description
-            start = page.indexOf("<!-- DESCRIPTION -->");
-            substring = page.substring(start + 20);
-            end = substring.indexOf("</span");
-            description = substring.substring(0, end);
-            p.getData().getContentMeta().set("description", description);
-            ps.println("Description:");
-            ps.println(description);
-
+            /*
+             * END INGREDIENT PARSE
+             */
             ps.close();
             out.close();
             return p;
@@ -162,7 +156,7 @@ public class RecipeboxParser implements HtmlParseFilter {
             System.out.println(e.getClass());
             return p;
         }
-        
+
     }
 
     public void setConf(Configuration conf) {
@@ -174,6 +168,9 @@ public class RecipeboxParser implements HtmlParseFilter {
     }
 
     private Parse addIngredToParse(String ingredient, Parse p) {
+        System.out.println(ingredient);
+        DecimalFormat fourPlaces = new DecimalFormat("0.####");
+
         Pattern pattern = Pattern.compile("(\\d+){1}(( (\\d+)){0,1}(/(\\d+)){0,1})");
         Matcher matcher = pattern.matcher(ingredient);
 
@@ -182,23 +179,16 @@ public class RecipeboxParser implements HtmlParseFilter {
         String numeratorStr = matcher.group(4);
         String denominatorStr = matcher.group(6);
         Double value = 0.0;
-        if(numeratorStr == null && denominatorStr == null)
-        {
-            value = Integer.parseInt(wholeNumStr)/1.0;
-        }
-        else if(numeratorStr == null)
-        {
-            value = (Integer.parseInt(wholeNumStr)/1.0)/(Integer.parseInt(denominatorStr)/1.0);
-        }
-        else if(denominatorStr == null)
-        {
+        if (numeratorStr == null && denominatorStr == null) {
+            value = Integer.parseInt(wholeNumStr) / 1.0;
+        } else if (numeratorStr == null) {
+            value = (Integer.parseInt(wholeNumStr) / 1.0) / (Integer.parseInt(denominatorStr) / 1.0);
+        } else if (denominatorStr == null) {
             //ERROR CONDITION, strings of the form "x y" slip through the regex
             return p;
-        }
-        else
-        {
-            value = Integer.parseInt(wholeNumStr)+
-                    ((Integer.parseInt(numeratorStr)/1.0)/(Integer.parseInt(denominatorStr)/1.0));
+        } else {
+            value = Integer.parseInt(wholeNumStr) +
+                    ((Integer.parseInt(numeratorStr) / 1.0) / (Integer.parseInt(denominatorStr) / 1.0));
         }
 
         ingredient = ingredient.substring(matcher.end() + 1);
@@ -206,27 +196,49 @@ public class RecipeboxParser implements HtmlParseFilter {
         if (ingredient.indexOf('(') != -1) {
             String innerValue = ingredient.substring(ingredient.indexOf('(') + 1, ingredient.indexOf(')'));
             String[] split = innerValue.split(" ");
-            Double doubVal = Double.parseDouble(split[0]);
-            String unit = split[1];
-            System.out.printf("Value %f\nUnit %s\n", doubVal, unit);
-            ingredient = ingredient.substring(ingredient.indexOf(')') + 1);
+            if(Character.isDigit(split[0].charAt(0))) {
+                Double doubVal = Double.parseDouble(split[0]);
+                String unit = split[1];
+                //System.out.printf("Value %f\nUnit %s\n", doubVal, unit);
+                ingredient = ingredient.substring(ingredient.indexOf(')') + 1);
+            }
         }
         //Find unit
-        if(ingredient.indexOf(" ",1)>0)
-        {
+        if (ingredient.indexOf(" ", 1) > 0) {
             //missing this block means the unit is implicit
-        String realUnit = ingredient.substring(0, ingredient.indexOf(" ", 1)).trim();
-        System.out.printf("realUnit %s\n", realUnit);
+            String realUnit = ingredient.substring(0, ingredient.indexOf(" ", 1)).trim();
+            //System.out.printf("realUnit %s\n", realUnit);
         }
         //Rest
         ingredient = ingredient.substring(ingredient.indexOf(" ") + 1);
-        System.out.printf("ingredient %s\n", ingredient);
+        //System.out.printf("ingredient %s\n", ingredient);
 
-        
+
         //p.getData().getContentMeta().set(ingredient, value.toString());
         //p.getData().getContentMeta().set("ingredient", ingredient);
         ingredientString += ingredient + ";";
+        amtString += fourPlaces.format(value) + ";";
         return p;
+    }
+    private String removetags(String page) {
+        String temp = "";
+        temp = page.replaceAll(".\n", "\r\n");
+        int startScript = 0;
+        int endScript = 0;
+        while(temp.indexOf("<script",startScript) != -1)
+        {
+            startScript = temp.indexOf("<script");
+            endScript = temp.indexOf("</script>",startScript);
+            //temp = temp.replaceFirst("<script.*?</script>"," ");
+            if(endScript == -1){
+                startScript++;
+                continue;
+            }
+            temp = temp.substring(0, startScript)+temp.substring(endScript, temp.length()-1);
+        }
+        temp = temp.replaceAll("<.*?>", "\n");
+
+        return temp;
     }
 }
 

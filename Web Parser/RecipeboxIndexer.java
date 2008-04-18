@@ -45,18 +45,22 @@ public class RecipeboxIndexer implements IndexingFilter {
      *       recommendedField.setBoost(5.0f);
      */
       String ingStr = parse.getData().getContentMeta().get("ingredient");
+      String amtStr = parse.getData().getContentMeta().get("values");
       if(ingStr != null)
       {
           String[] ingArray = ingStr.split(";");
+          String[] amtArray = amtStr.split(";");
           for(int i=0;i<ingArray.length;i++)
           {
               //String field = parse.getData().getContentMeta().names()[i];
               String field = "ingredient";
               String value = ingArray[i];
               doc.add(new Field(field, value, Field.Store.YES, Field.Index.UN_TOKENIZED));
-              System.out.println("Indexer: Recipebox added field "+field);
+              doc.add(new Field(ingArray[i], amtArray[i], Field.Store.YES, Field.Index.UN_TOKENIZED));
+              System.out.println("Indexer: Recipebox added ingredient "+value);
           }
       }
+      else {System.out.println("Indexer: Recipebox skipping");}
 
     return doc;
   }
