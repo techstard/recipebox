@@ -1,22 +1,15 @@
-//Chris Stafford
-//3/21/2008
 package org.apache.nutch.parse.recipebox;
 
 // JDK imports
-import java.util.Enumeration;
-import java.util.Properties;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.nutch.parse.HTMLMetaTags;
 import org.apache.nutch.parse.Parse;
 import org.apache.nutch.parse.HtmlParseFilter;
 import org.apache.nutch.protocol.Content;
 
-// Commons imports
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 // W3C imports
 import org.w3c.dom.DocumentFragment;
+
 // I/O imports
 import java.io.*;
 import java.util.regex.Matcher;
@@ -40,24 +33,8 @@ public class RecipeboxParser implements HtmlParseFilter {
             ps.print("Beginning Function on page: " + con.getUrl());
             int start = 0;
             int end = 0;
-            String page = "";
-            BufferedReader foo = new BufferedReader(new StringReader(new String(con.getContent())));
-            /*
-            while (foo.ready()) {
-                String blah = foo.readLine().toLowerCase();
-                if (blah.endsWith("\r\n")) {
-                    page = page + blah;
-                } else if (blah.endsWith("\r")) {
-                    page = page + blah + "\n";
-                } else {
-                    page = page + blah + "\r\n";
-                }
-              
-            //System.out.println(blah);
-            }
-            */
-            foo.close();
-            page = new String(con.getContent());
+
+            String page = new String(con.getContent());
 
             //Following parsing these values will be set
             String title = "";
@@ -81,10 +58,11 @@ public class RecipeboxParser implements HtmlParseFilter {
             end = substring.toLowerCase().indexOf("</title>");
             title = substring.substring(0, end).trim();
             title = title.replace("\r","");
+            title = getTitle(title, con.getUrl());
             System.out.println("Title: '"+title+"'");
 
             //TITLE ADDED TO INDEX
-            p.getData().getContentMeta().set("title", title);
+            p.getData().getContentMeta().set("recipeTitle", title);
             /*
              * END TITLE PARSING
              */
@@ -93,6 +71,9 @@ public class RecipeboxParser implements HtmlParseFilter {
              */
             ps.println("beginning ingredient parse");
             //trim the HTML to just the body of the text
+            UnitConversion uc = new UnitConversion();
+            System.out.println("Test: "+uc.toCommonUnit(1.0,""));
+            
             page = page.toLowerCase();
             
             start = page.indexOf("<body");
@@ -239,6 +220,38 @@ public class RecipeboxParser implements HtmlParseFilter {
         temp = temp.replaceAll("<.*?>", "\n");
 
         return temp;
+    }
+    private String getTitle(String title, String url) {
+        /*
+         * Inputs: HTML Title String and url of the page
+         * Output: Recipe Title 
+         * 
+         * Process: Removes common elements of titles, remaining uncommon
+         *  elements are assumed to the be title, this has been shown to be true
+         *  empirically.
+         */ 
+        if(url.contains(".com"))
+            url = url.substring(0,url.indexOf(".com")+4);
+        
+        String[] var;
+        if(title.contains("|"))
+            var = title.split("\\|");
+        else if(title.contains(":"))
+            var = title.split(":");
+        else
+            var = title.split("-");
+
+        for(int i=0;i<var.length;i++) {
+            System.out.println(var[i]);
+            if(var[i].trim().matches("([Rr]ecipe(s)?)"));          //Single word "recipe(s)" token
+            else if(url.contains(var[i].replace(" ", "").toLowerCase()));     //token (w/out spaces) is in hostname
+            else {
+                if(var[i].contains("by")) var[i] = var[i].substring(0,var[i].indexOf("by"));    //Removes author info
+                if(var[i].contains("at")) var[i] = var[i].substring(0,var[i].indexOf("at"));    //Removes site info
+                return var[i].trim();   //This is the title (Empirically)
+            }
+        }
+        return "";
     }
 }
 
