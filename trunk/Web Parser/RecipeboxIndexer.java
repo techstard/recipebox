@@ -24,6 +24,8 @@ import org.apache.nutch.crawl.Inlinks;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Document;
 
+
+
 public class RecipeboxIndexer implements IndexingFilter {
     
   public static final Log LOG = LogFactory.getLog(RecipeboxIndexer.class.getName());
@@ -38,11 +40,9 @@ public class RecipeboxIndexer implements IndexingFilter {
     throws IndexingException {
     /* data flow: pull all the fields out of the parse object as in:
             String recommendation = parse.getData().getMeta("Recommended");
-     * store them in doc objects as Store.YES and Index.UN_TOKENIZED as in:
-     *             Field recommendedField = 
-     *           new Field("recommended", recommendation, 
-     *              Field.Store.YES, Field.Index.UN_TOKENIZED);
-     *       recommendedField.setBoost(5.0f);
+     * store them in doc objects as Store.YES and Index.TOKENIZED
+     *        
+     * Naked ingredient strings are tokenized to facilitate searching, ingredient/value pairs are untokenized
      */
       String ingStr = parse.getData().getContentMeta().get("ingredient");
       String amtStr = parse.getData().getContentMeta().get("values");
@@ -55,7 +55,7 @@ public class RecipeboxIndexer implements IndexingFilter {
               //String field = parse.getData().getContentMeta().names()[i];
               String field = "ingredient";
               String value = ingArray[i];
-              doc.add(new Field(field, value, Field.Store.YES, Field.Index.UN_TOKENIZED));
+              doc.add(new Field(field, value, Field.Store.YES, Field.Index.TOKENIZED));
               doc.add(new Field(ingArray[i], amtArray[i], Field.Store.YES, Field.Index.UN_TOKENIZED));
               System.out.println("Indexer: Recipebox added ingredient "+value);
           }
