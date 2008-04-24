@@ -1,0 +1,21 @@
+;; DrJava project file, written by build 20070828-1759
+;; files in the source tree are relative to: /Users/chrisstafford/Desktop/Parser
+;; other files with relative paths are rooted at (the parent of) this project file
+(proj-root-and-base
+  (file (name "")))
+(source-files
+  (file (name "Parser.java")
+        (select 648 648)(scroll 0 0)(mod-date "16-Apr-2008 23:22:58")
+        (package "")))
+;; no aux files
+;; no collapsed branches
+;; no classpaths files
+;; no build directory
+(work-dir
+  (file (name "")))
+;; rooted at the (parent of the) project file
+(main-class
+  (file (name "Parser.java")))
+;; no breakpoints
+;; no watches
+;; no bookmarks
