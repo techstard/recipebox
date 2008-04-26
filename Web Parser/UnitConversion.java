@@ -20,18 +20,32 @@ public class UnitConversion {
         //mass (weight) "a pound's a pint the world round"
         //Currently, conversion is to volume
         conversion.put("pound", 2.0);
+		conversion.put(" lb", 2.0);
         conversion.put("ounce", 0.125);
+		conversion.put("oz", 0.125);
         conversion.put("kilogram", 4.205);
         conversion.put("gram", 4205.0);
         
         //volume
         conversion.put("cup", 1.0);
+		conversion.put(" c ", 1.0);
+		conversion.put(" c.", 1.0);
         conversion.put("gallon", 16.0);
         conversion.put("liter", 4.0);
         conversion.put("pint", 2.0);
         conversion.put("quart", 4.0);
+		conversion.put("qt.", 4.0);
         conversion.put("tablespoon", 16.0);
+		conversion.put("tablesp", 16.0);
+		conversion.put("tbl", 16.0);
+		conversion.put("tb", 16.0);
+		conversion.put(" T ", 16.0);
+		conversion.put("tbsp", 16.0);
         conversion.put("teaspoon", 48.0);
+		conversion.put("teasp", 48.0);
+		conversion.put(" ts ", 48.0);
+		conversion.put(" t ", 48.0);
+		conversion.put("tsp", 48.0);
           
     }
     public static double toCommonUnit(double value, String unit)
