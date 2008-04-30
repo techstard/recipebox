@@ -1,16 +1,11 @@
 package org.apache.nutch.parse.recipebox;
 
-// JDK import
-import java.util.logging.Logger;
-
 // Commons imports
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 
 // Nutch imports
-import org.apache.nutch.util.LogUtil;
-import org.apache.nutch.fetcher.FetcherOutput;
 import org.apache.nutch.indexer.IndexingFilter;
 import org.apache.nutch.indexer.IndexingException;
 import org.apache.nutch.parse.Parse;
@@ -46,6 +41,16 @@ public class RecipeboxIndexer implements IndexingFilter {
      */
       String ingStr = parse.getData().getContentMeta().get("ingredient");
       String amtStr = parse.getData().getContentMeta().get("values");
+      String recipeTitle = parse.getData().getContentMeta().get("recipeTitle");
+      String totVolume = parse.getData().getContentMeta().get("totVolume");
+      
+      System.out.println("Recipebox Indexing: "+parse.getData().getTitle());
+      System.out.println("\ttotal Volume= "+totVolume);
+      if(recipeTitle != null && !recipeTitle.equals(""))
+          doc.add(new Field("recipeTitle",recipeTitle, Field.Store.YES, Field.Index.TOKENIZED));
+      if(totVolume != null && !totVolume.equals(""))
+        doc.add(new Field("totVolume",totVolume, Field.Store.YES, Field.Index.NO));
+      
       if(ingStr != null)
       {
           String[] ingArray = ingStr.split(";");
@@ -55,9 +60,9 @@ public class RecipeboxIndexer implements IndexingFilter {
               //String field = parse.getData().getContentMeta().names()[i];
               String field = "ingredient";
               String value = ingArray[i];
+              if(ingArray[i].equals("") && amtArray[i].equals("")) continue;
               doc.add(new Field(field, value, Field.Store.YES, Field.Index.TOKENIZED));
               doc.add(new Field(ingArray[i], amtArray[i], Field.Store.YES, Field.Index.UN_TOKENIZED));
-              System.out.println("Indexer: Recipebox added ingredient "+value);
           }
       }
       else {System.out.println("Indexer: Recipebox skipping");}
