@@ -1,73 +1,109 @@
 <%@ include file="topContent.jsp"%>
 <%@ page import="java.io.*"%>
 <script type="text/javascript">
-//adapted from Dustin Diaz's script http://www.dustindiaz.com/add-and-remove-html-elements-dynamically-with-javascript/
-function addElement() {
-  var ni = document.getElementById('myDiv');
-  var numi = document.getElementById('numIng');
-  var num = (document.getElementById('numIng').value -0);
-  if(num>0)
-  {
-	  var ingText = document.getElementById('ingredient'+num).value;
-	  var unitText = document.getElementById('unit'+num).value;
-	  var countText = document.getElementById('count'+num).value;
-	  //alert("'"+ingText+"'");
-  }
-  if(num>0 &&(ingText == '' || unitText == '' || countText == ''))
-  {
-	document.getElementById('error').innerHTML = "Don't be greedy, fill in the form you have first";
-  }
-  else
-  {
-	  num++;
-	  numi.value = num;	//Keeps track of the number of ingredients present
-	  var newdiv = document.createElement('li');
-	  var divIdName = ''+num;
-	  newdiv.setAttribute('id',divIdName);
-	  newdiv.innerHTML = '<a href=\'#\' onclick=\'removeElement("'+divIdName+'")\'>delete </a>';
-	  newdiv.innerHTML += '<input type="text" name="count'+num+'" id="count'+num+'" size="10"/>';
-	  newdiv.innerHTML += '<input type="text" name="unit'+num+'" id="unit'+num+'" size="10"/>';
-	  newdiv.innerHTML += '<input type="text" name="ingredient'+num+'" id="ingredient'+num+'" size="30"/>';
-	  ni.appendChild(newdiv);
-	  document.getElementById('error').innerHTML = '';
-  }
-}
+var registeredEventListeners = new Array();
+	//
+	// Equivalent to target.addEventListener(event, listener, capture)
+	// Returns nothing.
+	//
+	function addEventListener(target, event, listener, capture)
+	{
+		registeredEventListeners.push( [target, event, listener, capture] );
+		target.addEventListener(event, listener, capture);
+	}
 
-function removeElement(divNum) {
-  var d = document.getElementById('myDiv');
-  var numi = document.getElementById('numIng');
-  var num = (document.getElementById('numIng').value -1);
-  numi.value = num;
-  var olddiv = document.getElementById(divNum);
-  d.removeChild(olddiv);
-  //alert("var i= "+((divNum-0)+1)+"; i<="+(num+1)+"&& "+(num+1)+">1" );
-  for(var i=(divNum-0)+1;i<=(num+1)&& (num+1)>1;i++)
-  {
-	var li = document.getElementById(''+i);
-	li.id = (li.id-0)-1;
-	li.firstChild.setAttribute("onclick", "removeElement('"+(li.id-0)+"')");
-	//alert(li.firstChild.getAttribute("onclick"));
-	var unit = document.getElementById("unit"+i);
-	unit.id = "unit"+((unit.id.charAt(4)-0)-1);
-	unit.name = unit.id;
-	var count = document.getElementById("count"+i);
-	count.id = "count"+((count.id.charAt(5)-0)-1);
-	count.name = count.id;
-	var ingredient = document.getElementById("ingredient"+i);
-	ingredient.id = "ingredient"+((ingredient.id.charAt(10)-0)-1);
-	ingredient.name = ingredient.id;
-  }
-  
-}
+	//
+	// Removes all event listeners from the page when it unloads.
+	//
+	function unregisterEventListeners(event)
+	{
+		while (registeredEventListeners.length > 0) {
+			var rel = registeredEventListeners.pop();
+			rel[0].removeEventListener(rel[1], rel[2], rel[3]);
+		}
+		window.removeEventListener('unload', unregisterEventListeners, false);
+	}
+	var http;
+
+	function handleHttpResponse() {
+		if (http.readyState == 4) {
+			if (http.status == 200) {
+				//alert("handleHTTPResponse");            
+				alert(http.responseText);
+				window.location.reload();
+			} else {
+				alert ( "Not able to retrieve name" +http.status);
+			}
+		}    
+	}
+
+	function getResults(amt, unit, ing, s) {
+		http = getHTTPObject();
+		var url = "writePantry.jsp?"; // The server-side script	
+		var queryString = "a="+amt+"&u="+unit+"&i="+ing+"&s="+s+"&prevNum="+<%=session.getAttribute("ingredients")%>;
+		http.open("GET", url + queryString, true);
+		http.onreadystatechange = handleHttpResponse;
+		http.send(null);
+	}
+	function getHTTPObject() {
+		var xmlhttp;
+		if (window.XMLHttpRequest) {
+			xmlhttp = new XMLHttpRequest();
+		} else if (window.ActiveXObject) {
+			xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		return xmlhttp;
+	}
+	function addElement(amt, unit, name) {
+		var div = document.createElement("div");
+		var del = document.createElement("a");
+		del.innerHTML = "delete ";
+		addEventListener(del,'click', function(e) {
+			e.target.parentNode.parentNode.removeChild(del.parentNode);
+		}, false);
+		div.appendChild(del);
+		var amtInput = document.createElement("input");
+			amtInput.type = "text";
+			amtInput.size = "5";
+			amtInput.value = (amt== null)?"":amt;
+		var unitInput = document.createElement("input");
+			unitInput.type = "text";
+			unitInput.value = (unit== null)?"":unit;
+		var ingInput = document.createElement("input");
+			ingInput.type = "text";
+			ingInput.value = (name== null)?"":name;
+		div.appendChild(amtInput);
+		div.appendChild(unitInput);
+		div.appendChild(ingInput);
+		document.getElementById("myDiv").appendChild(div);
+	}
+	function save() {
+		var shortcuts = "";
+		if(eval(document.getElementById("spices").checked)) shortcuts += "s";
+		if(eval(document.getElementById("baking").checked)) shortcuts += "b";
+		if(eval(document.getElementById("veg").checked)) shortcuts += "v";
+		getResults(getArray(1),getArray(2),getArray(3), shortcuts);
+		
+	}
+	function getArray(j) {
+		var parent = document.getElementById("myDiv");
+		var temp = "";
+		for(var i=2;i<parent.childNodes.length;i++) {
+			if(parent.childNodes[i].tagName == "DIV")
+			temp += ((parent.childNodes[i].childNodes[j].value != "")?parent.childNodes[i].childNodes[j].value:" ") +";";
+		}
+		return temp;
+	}
+
 </script>
 <%
-if(session.getAttribute("username") == null)
+if(session.getAttribute("username") == null && request.getParameter("newUser") == null)
 {%>
 	<div class="error" id="error">you must be logged in to view this page</div>
 <%}
 else
 {
-	if(request.getParameter("newUser") != null && request.getParameter("newUser").equals("true"))
+	if( request.getParameter("newUser") != null && request.getParameter("newUser").equals("true"))
 	{
 		String name = request.getParameter("username");
 		session.removeAttribute("newUser");
@@ -76,6 +112,7 @@ else
 		PrintStream write = new PrintStream(fout);
 		write.println("password="+request.getParameter("password"));
 		write.println("ingredients=0");
+		write.println("shortcuts=\\");
 		write.close();
 		fout.close();
 		
@@ -87,35 +124,31 @@ else
 		</jsp:forward>
 		<%
 	}
-	else out.println("we're updating the pantry of an existing user");
+	else out.println("<h4>Updating your existing pantry</h4>");
 	//Load the pantry, (either populated or not) then allow editing to occur
 	
 	String strCount = (String) session.getAttribute("ingredients");
 	int intCount = Integer.parseInt(strCount);
 	%>
-	<form method="post" action="writePantry.jsp"/>
-		<input type="submit" value="save"/>
-		<input type="hidden" name="prevNumItems" value="<%=session.getAttribute("ingredients")%>"/>
-		<input id="numIng" type="hidden" name="ingredients" value="<%=session.getAttribute("ingredients")%>"/>
+	<form>
+		<input type="checkbox" id="spices" <%if(((String)session.getAttribute("shortcuts")).contains("s"))out.print("CHECKED");%>>I have a spice rack</input></br>
+		<input type="checkbox" id="baking" <%if(((String)session.getAttribute("shortcuts")).contains("b"))out.print("CHECKED");%>>I have common baking supplies</input></br>
+		<input type="checkbox" id="veg" <%if(((String)session.getAttribute("shortcuts")).contains("v"))out.print("CHECKED");%>>I am a vegetarian or I only want vegetarian recipes</input></br>
+		<input type="button" onClick="save()" value="save"/>
+	</form>
 	<ul id ="myDiv" class="ingList">
+	<script type="text/javascript">
 	<%
-	for(int i=1;i<=intCount;i++)
-	{%>
-		<li id="<%=i%>"><a href="#" onclick="removeElement('<%=i%>')">delete</a>
-		<input type="hidden" name="ingredient<%=i%>" id="ingredient<%=i%>" value="<%=session.getAttribute("ingredient"+i)%>"/>
-		<input type="hidden" name="unit<%=i%>" id="unit<%=i%>" value="<%=session.getAttribute("unit"+i)%>"/>
-		<input type="hidden" name="count<%=i%>" id="count<%=i%>" value="<%=session.getAttribute("count"+i)%>"/>
-		<%
-		out.print(session.getAttribute("count"+i)+" ");
-		out.print(session.getAttribute("unit"+i)+" ");
-		out.println(session.getAttribute("ingredient"+i)+"<br/>");
-		%>
-		</li>	
-	<%}	
-%>
+	for(int i=0;i<intCount;i++)
+	{
+		out.print("addElement('"+session.getAttribute("count"+i)+"',");
+		out.print("'"+session.getAttribute("unit"+i)+"',");
+		out.println("'"+session.getAttribute("ingredient"+i)+"')");
+	}	
+%></script>
 	</ul>
 	</form>
-		<p><a href="javascript:;" onclick="addElement();">Add Some Elements</a></p>
+		<p><a href="javascript:;" onclick="addElement();">Add a New Ingredient</a></p>
 <%
 }
 %>

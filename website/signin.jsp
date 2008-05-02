@@ -9,6 +9,7 @@
 	Properties userProps = new Properties();
 	try
 	{
+		out.print(request.getParameter("link"));
 		FileInputStream userFile = new FileInputStream(path);
 		userProps.load(userFile);
 		userFile.close();
@@ -26,18 +27,20 @@
 		String strCount = (String) userProps.getProperty("ingredients");
 		int intCount = Integer.parseInt(strCount);
 		session.setAttribute("ingredients",intCount+"");
-		for(int i=1;i<=intCount;i++)
+		for(int i=0;i<intCount;i++)
 		{
 			session.setAttribute("ingredient"+i,userProps.getProperty("ingredient"+i));
 			session.setAttribute("unit"+i,userProps.getProperty("unit"+i));
 			session.setAttribute("count"+i,userProps.getProperty("count"+i));
 		}
+		session.setAttribute("shortcuts",userProps.getProperty("shortcuts"));
 %>	
 		<jsp:forward page="<%=request.getParameter("link")%>"/>
 <%
 	}
 	catch(Exception e)
 	{
+		out.print("failure :(");
 		session.setAttribute( "newUsername", name );
 		//The forward to newuser.jsp is only reached if we failed to forward to test.
 	}

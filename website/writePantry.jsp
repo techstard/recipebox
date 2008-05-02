@@ -2,36 +2,41 @@
 <%@ page import="java.util.Properties"%>
 <%@ page import="java.io.*"%>
 <%
-	String strCount = (String) request.getParameter("ingredients");
-	int newCount = Integer.parseInt(strCount);
-	strCount = (String) request.getParameter("prevNumItems");
-	int oldCount = Integer.parseInt(strCount);
-	
+	response.setContentType("text/xml");
+	response.setHeader("Cache-Control", "no-cache");
 	String path = application.getRealPath("/users/"+session.getAttribute("username")+".txt");
 	Properties userProps = new Properties();
 	FileInputStream userFile = new FileInputStream(path);
 	userProps.load(userFile);
 	userFile.close();
-	Enumeration params = request.getParameterNames();
-	while(params.hasMoreElements())
-	{
-		String paramName = (String) params.nextElement();
-		if(!paramName.equals("prevNumItems"))
-		{
-			try
-			{
-				userProps.setProperty(paramName, request.getParameter(paramName));
-				session.setAttribute(paramName, request.getParameter(paramName));
-			}
-			catch(Exception e)
-			{
-				out.println("failed on "+paramName);
-			}
-		}
+	
+	String[] amtArray = request.getParameter("a").split(";");
+	String[] unitArray = request.getParameter("u").split(";");
+	String[] ingArray = request.getParameter("i").split(";");
+	String shortcuts = request.getParameter("s");
+	userProps.setProperty("shortcuts",shortcuts);
+	session.setAttribute("shortcuts",shortcuts);
+	for(int i=0;i<ingArray.length;i++) {
+		//try
+		//{
+			userProps.setProperty("count"+i, amtArray[i]);
+			userProps.setProperty("unit"+i, unitArray[i]);
+			userProps.setProperty("ingredient"+i, ingArray[i]);
+			session.setAttribute("count"+i, amtArray[i]);
+			session.setAttribute("unit"+i, unitArray[i]);
+			session.setAttribute("ingredient"+i, ingArray[i]);
+		//}
+		//catch(Exception e)
+		//{
+		//	response.getWriter().write("Save unsuccessful :(");
+		//}
 	}
-	if(oldCount>newCount)
+	userProps.setProperty("ingredients",ingArray.length+"");
+	session.setAttribute("ingredients",ingArray.length+"");
+	int prevNum = Integer.parseInt(request.getParameter("prevNum"));
+	if(prevNum>ingArray.length)
 	{
-		for(int i=(newCount+1);i<=oldCount;i++)
+		for(int i=(ingArray.length+1);i<=prevNum;i++)
 		{
 			userProps.remove("ingredient"+i);
 			userProps.remove("unit"+i);
@@ -44,6 +49,5 @@
 	}
 	FileOutputStream outFile = new FileOutputStream(path);
 	userProps.store(outFile, "<!--This is a test-->");
-	out.println("it worked!");
+	response.getWriter().write("Save Successful");
 %>
-<jsp:forward page="updateUser.jsp"/>

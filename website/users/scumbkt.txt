@@ -1,4 +1,41 @@
 #<!--This is a test-->
-#Wed Mar 19 21:03:39 CST 2008
-ingredients=0
+#Fri May 02 13:54:09 EDT 2008
+ingredient0=sugar
+ingredients=12
+unit11=\ 
+unit10=\ 
+ingredient11=peanut butter
+ingredient10=salt
+unit9=\ 
+unit8=\ 
+unit7=\ 
+shortcuts=sb
+unit6=\ 
+count9=\ 
+count8=\ 
+unit5=\ 
+count7=\ 
+unit4=\ 
+count6=\ 
+unit3=\ 
+count5=\ 
+unit2=\ 
+count4=\ 
+unit1=\ 
+count3=\ 
+unit0=cups
+count2=\ 
 password=mdl3128
+count1=\ 
+count0=5
+count11=\ 
+count10=\ 
+ingredient9=baking powder
+ingredient8=flour
+ingredient7=green beans
+ingredient6=chocolate
+ingredient5=vanilla
+ingredient4=brown sugar
+ingredient3=cinnamon
+ingredient2=bacon
+ingredient1=baking soda

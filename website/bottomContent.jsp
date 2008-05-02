@@ -4,11 +4,12 @@
 						<span>
 							<h4>Nav Menu</h4>
 							<ul class="navMenu">
-								<li><a>Browse Recipes </a></li>
-								<li><a>Search </a></li>
+								<li><a href="browse.jsp">Browse by Field </a></li>
+								<li><a href="search.jsp">Search </a></li>
+								<li>-<a href="search.jsp">Basic Search </a></li>
+								<li>-<a href="pantrySearch.jsp">Pantry Search </a></li>
 								<li><a>Plan a Menu </a></li>
 								<li><a>About Us </a></li>
-								<li><a>Additional Things </a></li>
 							</ul>
 						</span>
 					</div>
