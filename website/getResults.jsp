@@ -11,6 +11,7 @@
 
 <%@ page import="java.util.HashMap"%>
 <%@ page import="java.util.Arrays"%>
+<%@ page import="java.util.Random"%>
 
 <%@ page import="lucenesearcher.Result"%>
 <%!
@@ -49,6 +50,7 @@ boolean haveIngredients(String[] myArray, String[] theirArray) {
 	IndexSearcher is = new IndexSearcher(fsDir);
 	boolean search = false;
 	boolean pantry = false;
+	boolean menu = false;
 	if(field.equals("search")) {
 		field = "ingredient";
 		search = true;
@@ -56,17 +58,22 @@ boolean haveIngredients(String[] myArray, String[] theirArray) {
 	if(field.equals("pantry")) {
 		field = "ingredient";
 		pantry = true;
+		query += "salt;black pepper;"; //common ingredients
+		if(shortcuts.contains("v")) //vegetarian
+			query += "!beef;!pork;!veal;!chicken;!fish;!turkey;";
+		if(shortcuts.contains("s")) {//spice rack
+			query += "allspice;anise;caraway;cayenne;celery seed;chile powder;cinnamon;clove;coriander;cumin;";
+			query += "curry;ginger;mace;mustard seed;nutmeg;paprika;pepper corns;poppy seed;saffron;sesame seed;";
+		}
+		if(shortcuts.contains("b")) {//bakery supplies
+			query += "flour;sugar;brown sugar;baking soda;baking powder;";
+		}
 	}
-	query += "salt;black pepper;"; //common ingredients
-	if(shortcuts != null && shortcuts.contains("v")) //vegetarian
-		query += "!beef;!pork;!veal;!chicken;!fish;!turkey;";
-	if(shortcuts != null && shortcuts.contains("s")) {//spice rack
-		query += "allspice;anise;caraway;cayenne;celery seed;chile powder;cinnamon;clove;coriander;cumin;";
-		query += "curry;ginger;mace;mustard seed;nutmeg;paprika;pepper corns;poppy seed;saffron;sesame seed;";
+	if(field.equals("menu")) {
+		field = "ingredient";
+		menu = true;
 	}
-	if(shortcuts != null && shortcuts.contains("b")) {//bakery supplies
-		query += "flour;sugar;brown sugar;baking soda;baking powder;";
-	}
+
 	String[] q = query.split(";");
 	QueryParser qp = new QueryParser(field, new StandardAnalyzer());
 	BooleanQuery bq = new BooleanQuery();
@@ -103,6 +110,11 @@ boolean haveIngredients(String[] myArray, String[] theirArray) {
 			if(haveIngredients(q,doc.getValues("ingredient")))
 				hs.put(doc.getValues("recipeTitle")[0],new Result(doc.getValues("recipeTitle")[0], doc.getField("url").stringValue()));
 		}
+		else if(menu) {
+			Result temp = new Result(doc.getValues("recipeTitle")[0], doc.getField("url").stringValue());
+			temp.setDocId(hits.id(i));
+            hs.put(doc.getValues("recipeTitle")[0],temp);
+		}
 		else {
 			for(int j=0; j<doc.getValues(field).length;j++) {
 				if(search) {
@@ -135,10 +147,16 @@ boolean haveIngredients(String[] myArray, String[] theirArray) {
 	Arrays.sort(outArray);
 	response.setContentType("text/xml");
 	response.setHeader("Cache-Control", "no-cache");
-    for(int j=outArray.length-1;j>=0;j--) {
-		response.getWriter().write(hs.get(outArray[j]).toWebString());
+	
+	if(menu) {
+		response.getWriter().write(hs.get(outArray[new Random().nextInt(outArray.length)]).toMenuString());
 	}
-	if(outArray.length == 0) {
-		response.getWriter().write("<tr><td colspan='26'>No Results</td></tr>");
+	else {
+		for(int j=outArray.length-1;j>=0;j--) {
+			response.getWriter().write(hs.get(outArray[j]).toWebString());
+		}
+		if(outArray.length == 0) {
+			response.getWriter().write("No Results");
+		}
 	}
 %>

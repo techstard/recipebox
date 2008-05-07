@@ -99,7 +99,7 @@ var registeredEventListeners = new Array();
 <%
 if(session.getAttribute("username") == null && request.getParameter("newUser") == null)
 {%>
-	<div class="error" id="error">you must be logged in to view this page</div>
+	<div class="error">you must be logged in to view this page</div>
 <%}
 else
 {

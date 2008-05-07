@@ -1,6 +1,4 @@
 <%@ include file="topContent.jsp"%>
-<html>
-	<head>
 		<script type="text/javascript">
 			var registeredEventListeners = new Array();
 			//
@@ -90,33 +88,33 @@
 				return unescape(url.substring(start+key.length+1,end));
 			}
 		</script>
-	</head>
-	<body onLoad="load()">
-		<h3>I want a recipe using only these ingredients with:</h3>
-		<form><div id="ingQuery">
+		<form action="#"><div id="ingQuery">
 <%	if(session.getAttribute("username")!= null) { 
 		String strCount3 = (String) session.getAttribute("ingredients");
 		int intCount3 = Integer.parseInt(strCount3);
 		for(int i=0;i<intCount3;i++)
-		{	out.print("<input type='radio' name='ing' value='"+session.getAttribute("ingredient"+i)+"'/>");
+		{	
+			out.print("<h3>I want a recipe using only these ingredients with:</h3>");
+			out.print("<input type='radio' name='ing' value='"+session.getAttribute("ingredient"+i)+"'/>");
 			out.print(session.getAttribute("count"+i)+" ");
 			out.print(session.getAttribute("unit"+i)+" ");
 			out.println(session.getAttribute("ingredient"+i)+"<br/>");
+			out.print("<h3>as the main ingredient</h3>");
 		}
 	}
 	else out.print ("<h3> You must be logged in to use this feature </h3>");
 %>
 		</div>
-		<h3>as the main ingredient</h3>
-			<input type="button" value="Make Query" onClick="submitQuery()"/>
+			<%	if(session.getAttribute("username")!= null) { 
+					out.print("<input type='button' value='Make Query' onClick='submitQuery()'>");
+				}
+			%>
 		</form>
 		<table>
 			<thead>
-				<tr id="selector"/>
+				<tr id="selector"><td></td></tr>
 			</thead>
-			<tbody id='parent'>
+			<tbody id='parent'><tr><td></td></tr>
 			</tbody>
 		</table>
-	</body>
-</html>
 <%@ include file="bottomContent.jsp"%>

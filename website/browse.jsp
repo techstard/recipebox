@@ -1,6 +1,4 @@
 <%@ include file="topContent.jsp"%>
-<head>
-	<title>Customer ID to First and Last Name using XmlHttpRequest</title>
 	<script language="javascript" type="text/javascript">
 	var registeredEventListeners = new Array();
 
@@ -102,25 +100,21 @@
 		}
 	}
 	</script>
-</head>
-<body onload="load()">
-	<form action="post">
+	<form action="#">
 	 <table>
-		<thead id='cats'/>
+		<thead id='cats'><tr><td></td></tr></thead>
 		<tbody>
+			<tr><td>
 			<table>
 				<thead>
-					<tr id="selector"/>
+					<tr id="selector"><td></td></tr>
 				</thead>
 				<tbody id='parent'>
 					<tr><td colspan="26">This is a Result!</td></tr>
 				</tbody>
 			</table>
+			</td></tr>
 		</tbody>
 	 </table>
 	</form>
-	<table id='parent'>
-	</table>
-</body>
-</html>
 <%@ include file="bottomContent.jsp"%>

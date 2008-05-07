@@ -1,5 +1,5 @@
 <%@ include file="topContent.jsp"%>
-<span>
+<div>
 	<p>Thank you for taking this opportunity to register so you can take full advantage of all that
 		the RecipeBox website has to offer!</p>
 	<FORM METHOD=POST ACTION="updateUser.jsp">
@@ -8,5 +8,5 @@
 		Password <input type="text" name="password" size="20">
 				<P><INPUT TYPE=SUBMIT>
 	</FORM>
-</span>
+</div>
 <%@ include file="bottomContent.jsp"%>

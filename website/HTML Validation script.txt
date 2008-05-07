@@ -1,0 +1,8 @@
+http://scumbkt19.case.edu:8080/recipebox/
+http://scumbkt19.case.edu:8080/recipebox/browse.jsp
+http://scumbkt19.case.edu:8080/recipebox/newuser.jsp
+http://scumbkt19.case.edu:8080/recipebox/pantrySearch.jsp
+http://scumbkt19.case.edu:8080/recipebox/planMenu.jsp
+http://scumbkt19.case.edu:8080/recipebox/search.jsp
+http://scumbkt19.case.edu:8080/recipebox/updateUser.jsp
+http://scumbkt19.case.edu:8080/recipebox/aboutUs.jsp
